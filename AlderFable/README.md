@@ -8,7 +8,7 @@ Heavily inspired by MapleStory, the idea was to tell the story of a dying MMORPG
 <p align="center"><img src="https://github.com/SmorMcfluff/Portfolio/blob/main/AlderFable/AlderFable%20Pathfinding.gif"/></p>
 <p align="center"><i>The NPC finds the closest enemy, taking into account the time it takes to climb a ladder.</i></p>
 
-Every physics tick, we check 
+In FixedUpdate, if the NPC is in `Hunt` state
 
 <details>
   <summary>GetNearestEnemy()</summary>
