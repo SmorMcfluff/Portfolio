@@ -10,7 +10,9 @@ Heavily inspired by MapleStory, the idea was to tell the story of a dying MMORPG
 
 In FixedUpdate, if the NPC is in the `Hunting` state and doesn't currently have a target, it finds path to each enemy within a set boundary. Since the game is a 2D platformer with ladders, the nearest enemy in straight-line distance isn't always the fastest to reach.
 
-If the enemy is on the same platform as we are we just calculate the flat distance. If not, we check which ladders we have to climb to get to the same platform using a BFS search. Using this path, we add together the distance from the NPC to the ladder, the height of the ladder, and the distance from the ladder to the enemy. The sum of this calculation is what we use to sort the enemies by distance.
+If the enemy is on the same platform as we are we just calculate the flat distance. If not, we check which ladders we have to climb to get to the same platform using a breadth-first search. Once we have the path we can calculate which enemy is the closest. We add together the distance from the NPC to the ladder, the height of the ladder, and the distance from the ladder to the enemy. The sum of this calculation is what we use to sort the enemies by distance.
+
+While a breadth-first search is a little overkill in this situation as every platform only has one ladder, this system allows me to expand if I wanted to.
 
 <details>
 <summary>GetNearestEnemy()</summary>
