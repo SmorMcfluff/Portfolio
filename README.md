@@ -1,7 +1,7 @@
 # Adam Wijk — Portfolio
 
 ## [AlderFable](https://github.com/SmorMcfluff/Portfolio/tree/main/AlderFable)
-<details>
+<details open>
 <summary>Details</summary>
   
   > **Date:**  Jun 2025
