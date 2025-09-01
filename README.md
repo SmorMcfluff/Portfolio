@@ -1,17 +1,15 @@
 # Adam Wijk — Portfolio
 
-## Project Name
+## [AlderFable](https://github.com/SmorMcfluff/Portfolio/tree/main/AlderFable)
 <details>
 <summary>Details</summary>
   
-  > **Date:**  Mon YEAR - Mon YEAR
+  > **Date:**  Jun 2025
 >
   > **Engine:** Unity
 > 
-  > **Genre:** Game
+  > **Genre:** 2D Platformer, Action
 >  
 </details>
 
-**Project Name** is a 2D game where you play as a main character. The main character does some things that are quite main characterly.
-
-I was responsible for Wakka Wakka. Making sure the Wakka system worked
+A very short 2D platforming fighting game made for the [Stop Killing Games Community Jam](https://itch.io/jam/stop-killing-games-game-jam).
