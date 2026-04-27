@@ -5,6 +5,14 @@ Anchor's Lament
 
 [Anchor's Lament](https://store.steampowered.com/app/3831400/Anchors_Lament/) is a grid-based fish-themed Auto battler that I worked on during my time at [Imperial Playgrounds](https://imperialplaygrounds.com/).
 
+## Table of Contents
+- [Backend Engineering](#backend-engineering)
+  - [Rank and In-Game Currency change upon combat end](#rank-and-in-game-currency-change-upon-combat-end)
+  - [Steam Microtransactions](#steam-microtransactions)
+- [New Mechanics](#new-mechanics)
+  - [Haste / Cold](#haste--cold)
+- [UI Design](#ui-design)
+
 
 ## Backend Engineering
 <p>
