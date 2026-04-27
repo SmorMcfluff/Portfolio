@@ -15,38 +15,28 @@ Anchor's Lament
 
 
 ## Backend Engineering
-<p>
+
 My main responsibility at Anchor's Lament was to maintain and expand the backend functions of the game, which is hosted via Supabase. This was my first time working with SQL, PL/pgSQL in general, and Supabase specifically.
-</p>
-  
-<p>
-Note: All code has been simplified, and fields have had their names changed in order to protect the integrity of the database.
-</p>
+
+
+    Note: All code has been simplified, and fields have had their names changed in order to protect the integrity of the database.
 
 
 ### Rank and In-Game Currency change upon combat end
-<p>
+
 My first back-end focused assignment was to add a server-authoritative competitive ranking system to the game, making sure to prevent malicious tampering.
-</p>
-<p>
+
 Due to the asynchronous nature of the game, where you meet stored ghosts of other players rather than facing them directly, we decided against a dynamic Elo-like system and instead stuck to a fixed "get X points if you win, lose Y points if you lose" model. This simplified the implementation to:
-<ol>
-    <li>Load the profile of the authenticated user (making sure there are no missing fields or rows, and resolving these issues if there are)</li>
-    <li>Fetch the rank and currency delta from a server-side settings table</li>
-    <li>Update the server-side player profile
-        <ul>
-            <li>Apply the rank change (with a minimum floor)</li>
-            <li>Conditionally apply currency amount on wins</li>
-        </ul>
-    </li>
-    <li>Return the updated player state to the game client, for display purposes</li>
-</ol>
 
-<p>
+1. Load the profile of the authenticated user (making sure there are no missing fields or rows, and resolving these issues if there are)
+2. Fetch the rank and currency delta from a server-side settings table
+3. Update the server-side player profile
+    - Apply the rank change (with a minimum floor)
+    - Conditionally apply currency amount on wins
+4. Return the updated player state to the game client, for display purposes
+
 All this is executed in a single function call, ensuring atomicity — either all of it occurs, or none of it does.
-</p>
 
-<p>
 When working in an online environment, it is very important to consider what should happen server-side and what happens client-side. In a competitive game such as this, the amount of coins and rank you gain upon winning should <i>never</i> be stored or handled on the client, which is why reward values are fetched from a server-side settings table at execution time.
 </p>
 <details><summary>Report Combat Result – PL/pgSQL code and commentary</summary>
@@ -82,16 +72,11 @@ BEGIN
     );
 END;
 ```
-<p>
 Not represented in this code block, "player_profile" actually represents two separate player tables:
-<ul>
-    <li>Public info (rank, wins/losses)</li> 
-    <li>Private info (currency)</li>
-</ul>
-</p>
-<p>
+
+- Public info (rank, wins/losses)
+- Private info (currency)
 The function assumes that the client reports each combat result exactly once. If called multiple times, they could lose or gain more points than they should. This could be improved by having a table keyed on (player_id UUID, combat_result_id UUID), making the function idempotent.
-</p>
 </details>
 
 ### Steam Microtransactions
