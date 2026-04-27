@@ -8,25 +8,73 @@ Anchor's Lament
 
 ## Backend Engineering
 <p>
-My main responsibility at Anchor's Lament was to maintain and expand the backend functions of the game. When I arrived, the groundwork for 
-
-In order to protect the integrity of the database I cannot share too much detail on the code that would reveal the shape of our tables. If I have to hide anything, I will provide explanations of the logic instead.
+My main responsibility at Anchor's Lament was to maintain and expand the backend functions of the game, which is hosted via Supabase. This was my first time working with SQL, PL/pgSQL in general, and Supabase specifically.
+</p>
+  
+<p>
+Note: All code has been simplified, and fields have had their names changed in order to protect the integrity of the database.
 </p>
 
-<details>
-<summary>filename.cs</summary>
 
-```cs
-public void yeppa
-{
-    Klubben().lubben()
-}
+### Rank and In-Game Currency change upon combat end
+<p>
+My first back-end focused assignment was to add a server-authoritative competitive ranking system to the game, making sure to prevent malicious tampering.
+</p>
+<p>
+Due to the asynchronous nature of the game, where you meet stored ghosts of other players rather than facing them directly, we decided against a dynamic Elo-like system and instead stuck to a fixed "get X points if you win, lose Y points if you lose" model. This simplified the implementation to:
+<ol>
+    <li>Get the profile of the authenticated user (making sure there are no missing fields or rows, and resolve these issue if there are)</li>
+    <li>Fetch the rank and currency delta from a server-side settings table</li>
+    <li>Update the server-side player profile</li>
+    <li>Return the changed player status to the game client, for display purposes</li>
+</ol>
+
+<p>
+When working in an online environment, it is very important to consider what should happen server-side and what happens client-side. In a competitive game such as this, the amount of coins and rank you gain upon winning should <i>never</i> be stored or handled on the client, which is why I added the server-side settings table.
+</p>
+<details><summary>Report Combat Result – PL/pgSQL code and commentary</summary>
+
+```sql
+DECLARE
+  v_rank_delta INT := 0;
+  v_new_rank INT;
+  v_currency_gain INT;
+  v_minimum_rank INT := 100;
+BEGIN
+    -- Load authenticated player profile, validate required fields
+
+    -- Fetch rank delta and currency gain from server-side settings
+
+    UPDATE player_profile
+    SET
+        current_rank = GREATEST(current_rank + v_rank_delta, v_minimum_rank),
+        wins = wins + CASE WHEN result = 'WIN' THEN 1 ELSE 0 END,
+        losses = losses + CASE WHEN result = 'LOSS' THEN 1 ELSE 0 END,
+        currency_balance = currency_balance + CASE WHEN result = 'WIN' THEN v_currency_gain ELSE 0 END
+    WHERE player_id = auth.uid()
+    RETURNING current_rank INTO v_new_rank;
+
+    RETURN jsonb_build_object(
+        'rank', v_new_rank,
+        'currency_balance',
+        (
+            SELECT COALESCE(currency_balance, 0)
+            FROM player_profile
+            WHERE player_id = auth.uid()
+        )
+    );
+END;
 ```
+<p>
+Not represented in this code block, "player_profile" actually represents two separate player tables, one for public (competitive, facing-other-players) data, one for private (cross-session, currency, your-eyes-only) data. 
+</p>
+<p>
+The function assumes that the the client report each combat end exactly once, but if the client were to call upon it multiple times they could lose or gain more points than they should. This could be solved with a table storing (player_id UUID, combat_result_id UUID) as a composite key, making sure each combat result only gets reported once.
+</p>
 </details>
 
 ## New Mechanics
 ### Haste / Cold
-> 
 <p>
 
 </p>
