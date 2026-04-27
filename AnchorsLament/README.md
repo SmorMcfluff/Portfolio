@@ -18,7 +18,6 @@ Anchor's Lament
 
 My main responsibility at Anchor's Lament was to maintain and expand the backend functions of the game, which is hosted via Supabase. This was my first time working with SQL, PL/pgSQL in general, and Supabase specifically.
 
-
     Note: All code has been simplified, and fields have had their names changed in order to protect the integrity of the database.
 
 
