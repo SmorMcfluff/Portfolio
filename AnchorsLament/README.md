@@ -3,7 +3,7 @@ Anchor's Lament
 
 <p align=center><img src="../AnchorsLament/AnchorsGif.gif"/></p>
 
-[Anchor's Lament](https://store.steampowered.com/app/3831400/Anchors_Lament/) is a grid-based fish-based Auto battler that I worked on during my time at [Imperial Playgrounds](https://imperialplaygrounds.com/).
+[Anchor's Lament](https://store.steampowered.com/app/3831400/Anchors_Lament/) is a grid-based fish-themed Auto battler that I worked on during my time at [Imperial Playgrounds](https://imperialplaygrounds.com/).
 
 
 ## Backend Engineering
@@ -23,14 +23,23 @@ My first back-end focused assignment was to add a server-authoritative competiti
 <p>
 Due to the asynchronous nature of the game, where you meet stored ghosts of other players rather than facing them directly, we decided against a dynamic Elo-like system and instead stuck to a fixed "get X points if you win, lose Y points if you lose" model. This simplified the implementation to:
 <ol>
-    <li>Get the profile of the authenticated user (making sure there are no missing fields or rows, and resolve these issue if there are)</li>
+    <li>Load the profile of the authenticated user (making sure there are no missing fields or rows, and resolving these issues if there are)</li>
     <li>Fetch the rank and currency delta from a server-side settings table</li>
-    <li>Update the server-side player profile</li>
-    <li>Return the changed player status to the game client, for display purposes</li>
+    <li>Update the server-side player profile
+        <ul>
+            <li>Apply the rank change (with a minimum floor)</li>
+            <li>Conditionally apply currency amount on wins</li>
+        </ul>
+    </li>
+    <li>Return the updated player state to the game client, for display purposes</li>
 </ol>
 
 <p>
-When working in an online environment, it is very important to consider what should happen server-side and what happens client-side. In a competitive game such as this, the amount of coins and rank you gain upon winning should <i>never</i> be stored or handled on the client, which is why I added the server-side settings table.
+All this is executed in a single function call, ensuring atomicity — either all of it occurs, or none of it does.
+</p>
+
+<p>
+When working in an online environment, it is very important to consider what should happen server-side and what happens client-side. In a competitive game such as this, the amount of coins and rank you gain upon winning should <i>never</i> be stored or handled on the client, which is why reward values are fetched from a server-side settings table at execution time.
 </p>
 <details><summary>Report Combat Result – PL/pgSQL code and commentary</summary>
 
@@ -66,10 +75,14 @@ BEGIN
 END;
 ```
 <p>
-Not represented in this code block, "player_profile" actually represents two separate player tables, one for public (competitive, facing-other-players) data, one for private (cross-session, currency, your-eyes-only) data. 
+Not represented in this code block, "player_profile" actually represents two separate player tables:
+<ul>
+    <li>Public info (rank, wins/losses)</li> 
+    <li>Private info (currency)</li>
+</ul>
 </p>
 <p>
-The function assumes that the the client report each combat end exactly once, but if the client were to call upon it multiple times they could lose or gain more points than they should. This could be solved with a table storing (player_id UUID, combat_result_id UUID) as a composite key, making sure each combat result only gets reported once.
+The function assumes that the client reports each combat result exactly once. If called multiple times, they could lose or gain more points than they should. This could be improved by having a table keyed on (player_id UUID, combat_result_id UUID), making the function idempotent.
 </p>
 </details>
 
