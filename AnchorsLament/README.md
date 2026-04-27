@@ -17,9 +17,9 @@ In order to protect the integrity of the database I cannot share too much detail
 <summary>filename.cs</summary>
 
 ```cs
-ybben
+public void yeppa
 {
-    klubben
+    Klubben().lubben()
 }
 ```
 </details>
