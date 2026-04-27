@@ -1,17 +1,21 @@
 # Adam Wijk — Portfolio
 
-## [AlderFable](https://github.com/SmorMcfluff/Portfolio/tree/main/AlderFable)
+<p align=center><img src="AnchorsLament/AnchorsCapsule.jpg"/></p>
+
+## [Anchor's Lament](/AnchorsLament/README.md)
+
 <details open>
 <summary>Details</summary>
-  
-  > **Date:**  Jun 2025
+
+> **Date:**  2025-2026
 >
-  > **Engine:** Unity
+> **Role(s):** Lead Programmer, Backend Engineer, UI Designer
+>
+> **Engine:** Unity
 > 
-  > **Genre:** 2D Platformer, Action
->  
+> **Genre:** Auto battler, Rogue-lite
 </details>
 
-A very short 2D platforming fighting game made for the [Stop Killing Games Community Jam](https://itch.io/jam/stop-killing-games-game-jam).
+A grid-based fish-based Auto battler that I worked on during my time at [Imperial Playgrounds](https://imperialplaygrounds.com/).
 
 One of my first solo game jam projects. Originally meant to be a 10 minute story game about your favourite MMO dying, but I was quickly reminded of the fact that solo developing takes forever.

@@ -73,6 +73,9 @@ The function assumes that the the client report each combat end exactly once, bu
 </p>
 </details>
 
+### Steam Microtransactions
+
+
 ## New Mechanics
 ### Haste / Cold
 <p>
