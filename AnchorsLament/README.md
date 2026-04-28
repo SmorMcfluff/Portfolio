@@ -9,7 +9,7 @@ Anchor's Lament
 [**Anchor's Lament**](https://store.steampowered.com/app/3831400/Anchors_Lament/) is a grid-based fish-themed Auto battler that I worked on during my time at [**Imperial Playgrounds**](https://imperialplaygrounds.com/).
 
 ## 0.0 - Table of Contents
-- [1.0 – Back-end Engineering](#back-end-engineering)
+- [1.0 – Backend Engineering](#backend-engineering)
   - [1.1 – Rank and In-Game Currency change upon combat end](#rank-and-in-game-currency-change-upon-combat-end)
   - [1.2 – Steam Microtransactions](#steam-microtransactions)
 - [2.0 – New Mechanics](#new-mechanics)
@@ -17,10 +17,10 @@ Anchor's Lament
 - [3.0 – UI Design](#ui-design)
 
 
-## 1.0 – Back-end Engineering
+## 1.0 – Backend Engineering
 >Note: All code in this section has been simplified, and fields have had their names changed in order to protect the integrity of the database.
 
-My main responsibility at Anchor's Lament was to maintain and expand the back-end functions of the game, which is hosted via Supabase. This was my first time working in Supabase, and with SQL, PL/pgSQL in general.
+My main responsibility at Anchor's Lament was to maintain and expand the backend functions of the game, which is hosted via Supabase. This was my first time working in Supabase, and with SQL, PL/pgSQL in general.
 
 ### 1.1 - Competitive Rank
 <p align="center">
@@ -30,41 +30,41 @@ My main responsibility at Anchor's Lament was to maintain and expand the back-en
 <i>Pictured: A screenshot of the leaderboard during Season 1 of Anchor's Lament</i>
 </p>
 
-I designed a server-authoritative competitive ranking system to the game, making sure to prevent malicious tampering. This system is mainly comprised of three functions:
+I designed a server-authoritative competitive ranking system for the game, making sure to prevent malicious tampering. This system is mainly comprised of three functions:
 
 ### <center>1.1.1 – Fetching player rank on login</center>
-We fetch the player's rank on login and store it locally strictly for display purposes, but we never modify this value client-side. In order for this to be displayed in the first place we have to make sure that the player *has* a rank to fetch, and if it doesn't we assume it is a new player and set his rank to a default rank we have saved in a server-side settings table.
+We fetch the player's rank on login and store it locally strictly for display purposes, but we never modify this value client-side. In order for this to be displayed in the first place we have to make sure that the player *has* a rank to fetch, and if it doesn't we assume it is a new player and set their rank to a default value we have saved in a server-side settings table.
 
 <details><summary>Fetch player rank if it exists – PL/pgSQL code</summary>
 
 ```sql
 DECLARE
     v_default_rank INT;
-    v_current_rank INT;
+    v_current_points INT;
 BEGIN
-    SELECT p.current_rank
-    INTO v_current_rank
+    SELECT p.current_points
+    INTO v_current_points
     FROM player_profiles p
     WHERE p.player_id = auth.uid();
 
     SELECT s.value::int
     INTO v_default_rank
     FROM settings_table s
-    WHERE s.key = 'starting_points'
+    WHERE s.key = 'starting_rank'
     LIMIT 1;
 
     IF v_default_rank IS NULL THEN
         v_default_rank := 1000;
     END IF;
 
-    IF v_current_rank IS NULL OR v_current_rank = 0 THEN
+    IF v_current_points IS NULL OR v_current_points = 0 THEN
         UPDATE player_profiles p
-        SET current_rank = v_default_rank
+        SET current_points = v_default_rank
         WHERE p.player_id = auth.uid()
-        RETURNING current_rank INTO v_current_rank;
+        RETURNING current_points INTO v_current_points;
     END IF;
 
-    RETURN v_current_rank;
+    RETURN v_current_points;
 END;
 ```
 </details>
@@ -98,12 +98,12 @@ BEGIN
 
     UPDATE player_profiles p
     SET
-        current_rank = GREATEST(current_rank + v_rank_delta, v_minimum_rank),
+        current_points = GREATEST(current_points + v_rank_delta, v_minimum_rank),
         wins = wins + CASE WHEN result = 'WIN' THEN 1 ELSE 0 END,
         losses = losses + CASE WHEN result = 'LOSS' THEN 1 ELSE 0 END,
         currency_balance = currency_balance + CASE WHEN result = 'WIN' THEN v_currency_gain ELSE 0 END
     WHERE p.player_id = auth.uid()
-    RETURNING current_rank INTO v_new_rank;
+    RETURNING current_points INTO v_new_rank;
 
     RETURN jsonb_build_object(
         'rank', v_new_rank,
@@ -122,13 +122,62 @@ END;
 </details>
 <br>
 
-### <center>1.1.3 - Fetching Leaderboard</center>
+### <center>1.1.3 - Fetching leaderboard</center>
+
+This is where it all comes together! In this function we return a single page of the leaderboard, as well as information on what position the local player (the one playing the game) has, so this can always be displayed in-game.
+
+1. We sort every player on the database by their current rank points and store them in an array
+2. From this array we get yet *another* array, limited to the size of the page (an argument passed in from the client), offset depending on which page we're currently on.
+3. 
 
 <details>
-<summary>Fetch Leaderboard and player position – PL/pgSQL code</summary>
+<summary>Fetch leaderboard and local player position – PL/pgSQL code</summary>
 
 ```sql
--- Anonymized code will go here!!1!
+BEGIN
+    RETURN QUERY
+    WITH ranked_players AS (
+        SELECT
+            p.player_id,
+            p.display_name,
+            p.current_points::integer AS rank,
+            ROW_NUMBER() OVER (
+                ORDER BY p.current_points DESC, p.player_id
+            )::integer AS leaderboard_position
+        FROM player_profiles p
+        WHERE p.current_points > 0
+    ),
+    page AS (
+        SELECT
+            rp.player_id,
+            rp.display_name,
+            rp.current_points,
+            rp.leaderboard_position,
+            (rp.player_id = auth.uid()) AS is_local_player
+        FROM ranked_players rp
+        ORDER BY rp.leaderboard_position
+        LIMIT page_size
+        OFFSET GREATEST(page_number, 0) * page_size
+    ),
+    local_player AS (
+        SELECT
+            rp.leaderboard_position AS player_position,
+            ((rp.leaderboard_position - 1) / page_size)::integer AS player_page
+        FROM ranked_players rp
+        WHERE rp.player_id = auth.uid()
+    )
+    SELECT
+        p.player_id,
+        p.display_name,
+        p.rank,
+        p.leaderboard_position,
+        lp.player_position,
+        lp.player_page,
+        p.is_local_player
+    FROM page p
+    CROSS JOIN local_player lp
+    ORDER BY p.leaderboard_position;
+END;
 ```
 </details>
 
