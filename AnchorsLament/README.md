@@ -27,8 +27,8 @@ My main responsibility at Anchor's Lament was to maintain and expand the backend
 <p style="text-align: center;">
   <img src="../AnchorsLament/Leaderboard.jpg" alt="A screenshot of the leaderboard" style="width:75%; height:75%;" />
 </p>
-<p style="text-align: center" >
-<marquee><i>A screenshot of the leaderboard</i></marquee>
+<p style="text-align: center">
+<i>A screenshot of the leaderboard</i>
 </p>
 My first back-end focused assignment was to add a server-authoritative competitive ranking system to the game, making sure to prevent malicious tampering.
 
