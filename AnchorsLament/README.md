@@ -24,7 +24,7 @@ My main responsibility at Anchor's Lament was to maintain and expand the backend
 
 ---
 ### Change Rank and In-Game Currency upon combat end
-<p style="text-align: center;">
+<p align="center">>
   <img src="../AnchorsLament/Leaderboard.jpg" alt="A screenshot of the leaderboard" style="width:75%; height:75%;" />
 </p>
 <p align="center">
