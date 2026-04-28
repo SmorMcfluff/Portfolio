@@ -23,7 +23,7 @@ My main responsibility at Anchor's Lament was to maintain and expand the backend
 >Note: All code has been simplified, and fields have had their names changed in order to protect the integrity of the database.
 
 ---
-### Change Rank and In-Game Currency upon combat end
+### <center>Competitive Rank and Leaderboards</center>
 <p align="center">>
   <img src="../AnchorsLament/Leaderboard.jpg" alt="A screenshot of the leaderboard" style="width:75%; height:75%;" />
 </p>
