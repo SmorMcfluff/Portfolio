@@ -1,45 +1,55 @@
+
 Anchor's Lament
 ===
 
 <p align="center">
-  <img src="../AnchorsLament/AnchorsGif.gif"/>
+  <img src="AnchorsGif.gif"/>
 </p>
 
 [**Anchor's Lament**](https://store.steampowered.com/app/3831400/Anchors_Lament/) is a grid-based fish-themed Auto battler that I worked on during my time at [**Imperial Playgrounds**](https://imperialplaygrounds.com/).
 
-## Table of Contents
-- [Backend Engineering](#backend-engineering)
-  - [Rank and In-Game Currency change upon combat end](#rank-and-in-game-currency-change-upon-combat-end)
-  - [Steam Microtransactions](#steam-microtransactions)
-- [New Mechanics](#new-mechanics)
-  - [Haste / Cold](#haste--cold)
-- [UI Design](#ui-design)
+## 0.0 - Table of Contents
+- [1.0 - Back-end Engineering](#back-end-engineering)
+  - [1.1 - Rank and In-Game Currency change upon combat end](#rank-and-in-game-currency-change-upon-combat-end)
+  - [1.2 - Steam Microtransactions](#steam-microtransactions)
+- [2.0 - New Mechanics](#new-mechanics)
+  - [2.1 - Haste / Cold](#haste--cold)
+- [3.0 - UI Design](#ui-design)
 
 
-## Backend Engineering
+## 1.0 - Back-end Engineering
+>Note: All code in this section has been simplified, and fields have had their names changed in order to protect the integrity of the database.
 
-My main responsibility at Anchor's Lament was to maintain and expand the backend functions of the game, which is hosted via Supabase. This was my first time working with SQL, PL/pgSQL in general, and Supabase specifically.
+My main responsibility at Anchor's Lament was to maintain and expand the back-end functions of the game, which is hosted via Supabase. This was my first time working in Supabase, and with SQL, PL/pgSQL in general.
 
->Note: All code has been simplified, and fields have had their names changed in order to protect the integrity of the database.
-
----
-### <center>Competitive Rank and Leaderboards</center>
-<p align="center">>
-  <img src="../AnchorsLament/Leaderboard.jpg" alt="A screenshot of the leaderboard" style="width:75%; height:75%;" />
+### 1.1 - Competitive Rank
+<p align="center">
+  <img src="Leaderboard.jpg" alt="A screenshot of the leaderboard during Season 1 of Anchor's Lament" style="width:75%; height:75%" />
 </p>
 <p align="center">
-<i>A screenshot of the leaderboard</i>
+<i>Pictured: A screenshot of the leaderboard during Season 1 of Anchor's Lament</i>
 </p>
-My first back-end focused assignment was to add a server-authoritative competitive ranking system to the game, making sure to prevent malicious tampering.
 
+My first back-end focused assignment was to add a server-authoritative competitive ranking system to the game, making sure to prevent malicious tampering. This system can be summarized by three back-end functions.
+
+### <center>1.1.1 - Fetching player rank on login</center>
+### 1.1.1 - Fetching player rank on login
+
+| | |
+|---|---|
+| We fetch the player's rank on login and store it locally strictly for display purposes, but we never modify this value client-side. In order for this to be diplayed in the first place, we have to make sure that the player *has* a rank to fetch. | <center><img src="RankIcon.jpg" width="500"/></center> |
+
+I made the decision that every player should start at 1000 points, placing them at the very bottom of "Deckhand" rank, our equivalent to a Silver tier.
+
+### <center>1.1.2 - Updating rank on combat end</center>
 Due to the asynchronous nature of the game, where you meet stored ghosts of other players rather than facing them directly, we decided against a dynamic Elo-like system and instead stuck to a fixed "get X points if you win, lose Y points if you lose" model. This simplified the implementation to:
 
-1. Load the profile of the authenticated user (making sure there are no missing fields or rows, and resolving these issues if there are)
-2. Fetch the rank and currency delta from a server-side settings table
-3. Update the server-side player profile
-    - Apply the rank change (with a minimum floor)
-    - Conditionally apply currency amount on wins
-4. Return the updated player state to the game client, for display purposes
+1. Load the profile of the authenticated user (making sure there are no missing fields or rows, and failing early if there are).
+2. Fetch the rank and currency delta from a server-side settings table.
+3. Update the server-side player profile.
+    - Apply the rank change (with a minimum floor).
+    - Conditionally apply currency amount on wins.
+4. Return the updated player state to the game client, for display purposes.
 
 All this is executed in a single function call, ensuring atomicity — either all of it occurs, or none of it does.
 
@@ -77,14 +87,16 @@ BEGIN
     );
 END;
 ```
-Not represented in this code block, "player_profile" actually represents two separate player tables:
+</details>
+<br>
+Not represented in the above code, "player_profile" actually represents two separate player tables:
 
 - Public info (rank, wins/losses)
 - Private info (currency)
 The function assumes that the client reports each combat result exactly once. If called multiple times, they could lose or gain more points than they should. This could be improved by having a table keyed on (player_id UUID, combat_result_id UUID), making the function idempotent.
-</details>
+<hr>
 
-### Steam Microtransactions
+### <center>Steam Microtransactions</center>
 
 
 ## New Mechanics
