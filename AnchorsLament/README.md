@@ -1,9 +1,11 @@
 Anchor's Lament
 ===
 
-<p align=center><img src="../AnchorsLament/AnchorsGif.gif"/></p>
+<p style="text-align: center;">
+  <img src="../AnchorsLament/AnchorsGif.gif"/>
+</p>
 
-[Anchor's Lament](https://store.steampowered.com/app/3831400/Anchors_Lament/) is a grid-based fish-themed Auto battler that I worked on during my time at [Imperial Playgrounds](https://imperialplaygrounds.com/).
+[**Anchor's Lament**](https://store.steampowered.com/app/3831400/Anchors_Lament/) is a grid-based fish-themed Auto battler that I worked on during my time at [**Imperial Playgrounds**](https://imperialplaygrounds.com/).
 
 ## Table of Contents
 - [Backend Engineering](#backend-engineering)
@@ -18,11 +20,16 @@ Anchor's Lament
 
 My main responsibility at Anchor's Lament was to maintain and expand the backend functions of the game, which is hosted via Supabase. This was my first time working with SQL, PL/pgSQL in general, and Supabase specifically.
 
-    Note: All code has been simplified, and fields have had their names changed in order to protect the integrity of the database.
+>Note: All code has been simplified, and fields have had their names changed in order to protect the integrity of the database.
 
-
-### Rank and In-Game Currency change upon combat end
-
+---
+### Change Rank and In-Game Currency upon combat end
+<p style="text-align: center;">
+  <img src="../AnchorsLament/Leaderboard.jpg" alt="A screenshot of the leaderboard" style="width:75%; height:75%;" />
+</p>
+<p style="text-align: center" >
+<marquee><i>A screenshot of the leaderboard</i></marquee>
+</p>
 My first back-end focused assignment was to add a server-authoritative competitive ranking system to the game, making sure to prevent malicious tampering.
 
 Due to the asynchronous nature of the game, where you meet stored ghosts of other players rather than facing them directly, we decided against a dynamic Elo-like system and instead stuck to a fixed "get X points if you win, lose Y points if you lose" model. This simplified the implementation to:
@@ -36,8 +43,8 @@ Due to the asynchronous nature of the game, where you meet stored ghosts of othe
 
 All this is executed in a single function call, ensuring atomicity — either all of it occurs, or none of it does.
 
-When working in an online environment, it is very important to consider what should happen server-side and what happens client-side. In a competitive game such as this, the amount of coins and rank you gain upon winning should <i>never</i> be stored or handled on the client, which is why reward values are fetched from a server-side settings table at execution time.
-</p>
+When working in an online environment, it is very important to consider what should happen server-side and what happens client-side. In a competitive game such as this, the amount of coins and rank you gain upon winning should *never* be stored or handled on the client, which is why reward values are fetched from a server-side settings table at execution time.
+
 <details><summary>Report Combat Result – PL/pgSQL code and commentary</summary>
 
 ```sql
@@ -48,7 +55,6 @@ DECLARE
   v_minimum_rank INT := 100;
 BEGIN
     -- Load authenticated player profile, validate required fields
-
     -- Fetch rank delta and currency gain from server-side settings
 
     UPDATE player_profile
