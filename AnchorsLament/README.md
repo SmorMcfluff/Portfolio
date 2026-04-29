@@ -38,7 +38,7 @@ I designed a backend-controlled competitive ranking system for the game, keeping
 
 This system is mainly composed of three functions:
 
-### <center>1.1.1 – Rank Initialization on Login</center>
+### <p align="center">1.1.1 – Rank Initialization on Login</p>
 We fetch the player's rank on login and store it locally strictly for display purposes, but we never modify this value client-side. In order for this to be displayed in the first place we have to make sure that the player *has* a rank to fetch, and if they don't we assume it is a new player and set their rank to a default value we have saved in a server-side settings table.
 
 <details><summary>Initialize Player Rank – Initial implementation</summary>
@@ -86,7 +86,7 @@ This approach is simple, but it can fail during concurrent login requests or wit
 ```
 </details>
 
-### <center>1.1.2 – Transactional Rank & Currency Update</center>
+### <p align="center">1.1.2 – Transactional Rank & Currency Update</p>
 Due to the asynchronous nature of the game, where you meet stored ghosts of other players rather than facing them directly, we decided against a dynamic Elo-like system and instead stuck to a fixed "get X points if you win, lose Y points if you lose" model. This simplified the implementation to:
 
 1. Load the profile of the authenticated user (making sure there are no missing fields or rows, and failing early if there are).
@@ -146,7 +146,7 @@ This function contains two critical security flaws: the `combat_result` state is
 
 Solving the issue with client-side result reporting was beyond the scope of my role, as the system was already client-authoritative when I joined. You can read about how I would approach the problem in another game in the [Retrospective]() section.
 
-### <center>1.1.3 – Fetching Leaderboard</center>
+### <p align="center">1.1.3 – Fetching Leaderboard</p>
 
 This is where it all comes together! In this function we return a single page of the leaderboard, as well as information on what position the local player (the one playing the game) has, so this can always be displayed in-game.
 
@@ -220,7 +220,7 @@ This function has a potential performance issue: running `ROW_NUMBER()` over the
 ```
 </details>
 
-### <center>1.1.4 – Retrospective</center>
+### <p align="center">1.1.4 – Retrospective</p>
 When I joined the Anchor's Lament team the game did not have a leaderboard or an in-game currency. There were plans for this, but the groundwork to handle this safely simply did not exist. There is no central server that validates combat results, everything gameplay related happens locally. One could potentially tamper with the game client's RAM to grant themselves infinite health or their units infinite power — winning every combat round instantly and soaring through the ranks.
 
 As a thought experiment: If I were to make this game from scratch with infinite resources, all data about units, equipment, and similar game content would exist on a server-side spreadsheet or database table. The art would be handled via Unity's Addressable Asset System fetching art from a remote server. Adding a new unit or item to the game could happen completely without updating the client.
